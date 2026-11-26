@@ -6,6 +6,7 @@ Notable changes to RIG. Versions follow [Semantic Versioning](https://semver.org
 
 ### Added
 
+- Fuse: `fuse` minutes on `POST /api/v1/instances` and `rent_gpu` ends the instance by itself after that much running time
 - Loadouts: an instance can boot into PyTorch + Jupyter, ComfyUI, Forge or bare CUDA (`loadout` on `POST /api/v1/instances`, `GET /api/v1/loadouts`, `rent_gpu` over MCP)
 
 ## [0.1.0] - 2026-11-26

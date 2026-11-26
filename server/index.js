@@ -56,7 +56,7 @@ const TOOLS = [
   T('get_output', 'One output: making, ready with a link to its file, or failed with its credits back.', { id: { type: 'string' } }, ['id']),
   T('list_outputs', 'Your outputs of the last 24 hours, newest first.'),
   T('list_gpus', 'The NVIDIA GPUs open to rent now, with their memory and their rate in credits an hour.'),
-  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. gpu is a name, or "auto" with vram for the cheapest that fits. loadout is what it boots with: pytorch (default), comfyui, forge or bare.', { gpu: { type: 'string' }, vram: { type: 'number' }, loadout: { type: 'string' } }),
+  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. gpu is a name, or "auto" with vram for the cheapest that fits. loadout is what it boots with: pytorch (default), comfyui, forge or bare. fuse is a number of minutes of running time after which it ends itself.', { gpu: { type: 'string' }, vram: { type: 'number' }, loadout: { type: 'string' }, fuse: { type: 'number' } }),
   T('list_instances', 'Your instances that run, and those that ended in the last 24 hours.'),
   T('get_instance', 'One instance: its status, how to reach it over SSH once it is ready, and what it cost so far.', { id: { type: 'string' } }, ['id']),
   T('end_instance', 'Ends an instance. Its credits stop at that second. An ended instance never starts again.', { id: { type: 'string' } }, ['id']),

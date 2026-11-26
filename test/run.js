@@ -96,6 +96,10 @@ try {
   ok('billed by the second at its rate', mid.seconds >= 2 && mid.credits > 0 && mid.credits <= mid.rate * (mid.seconds + 3) / 3600, JSON.stringify(mid));
   const end = await call('/api/v1/instances/' + i1.j.id + '/terminate', { method: 'POST', token: tA }); ok('instance ends', end.j.status === 'ended'); await sleep(1300);
   ok('its credits stop at that second', (await call('/api/v1/instances/' + i1.j.id, { token: tA })).j.credits === end.j.credits);
+  ok('a fuse under 5 minutes is refused outside tests, and a wrong one always', (await call('/api/v1/instances', { body: { gpu: 'auto', fuse: -3 }, token: tA })).status === 400);
+  const iF = await call('/api/v1/instances', { body: { gpu: 'auto', fuse: 0.04 }, token: tA });
+  const blown = await until(async () => { const i = (await call('/api/v1/instances/' + iF.j.id, { token: tA })).j; return i.status === 'ended' ? i : null; }, 9000);
+  ok('an instance with a fuse ends itself', iF.j.fuse === 0.04 && blown?.reason === 'its fuse ran out' && blown.seconds >= 2 && blown.seconds <= 6, JSON.stringify(blown).slice(0, 240));
   const i2 = await call('/api/v1/instances', { body: { gpu: 'RTX 5090' }, token: tA });
   const moved = await until(async () => { const i = (await call('/api/v1/instances/' + i2.j.id, { token: tA })).j; return i.status === 'running' ? i : null; }, 8000);
   ok('a GPU that fails to start moves to another one', !!moved && moved.gpu !== 'RTX 5090', JSON.stringify(moved));
