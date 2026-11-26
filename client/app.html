@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>App · RIG</title>
+<meta name="description" content="Buy credits, make outputs, rent GPUs, and manage API keys and receipts on RIG.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/rig.css">
+</head>
+<body>
+<header class="top">
+  <a class="mark" href="/"><i></i><span>RIG</span></a>
+  <nav><a href="/docs">Docs</a><a class="xlink" hidden target="_blank" rel="noopener noreferrer">X</a><a class="mono keep" id="bal" href="#/billing" hidden></a></nav>
+  <button class="btn ink sm keep" id="wallet">Connect wallet</button>
+</header>
+<div class="app">
+  <aside class="side" id="side">
+    <span class="lbl">Make</span><a href="#/playground">Playground</a><a href="#/outputs">Outputs</a>
+    <span class="lbl">Rent</span><a href="#/marketplace">Marketplace</a><a href="#/instances">My instances</a><a href="#/ssh">SSH keys</a>
+    <span class="lbl">Account</span><a href="#/overview">Overview</a><a href="#/billing">Billing</a><a href="#/api">API &amp; x402</a><a href="#/receipts">Receipts</a>
+  </aside>
+  <main class="view" id="view"></main>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
