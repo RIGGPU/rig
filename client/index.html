@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RIG: rent GPUs by the second on Robinhood Chain</title>
+<meta name="description" content="RIG is an onchain GPU cloud on Robinhood Chain. Rent NVIDIA GPUs by the second, make images, video and voice per output, and pay in USDG, ETH or $RIG. Built for people and for agents.">
+<meta property="og:title" content="RIG: rent GPUs by the second on Robinhood Chain">
+<meta property="og:description" content="A whole GPU by the second. One output at a time. Paid onchain, by you or your agent.">
+<link rel="canonical" href="https://riggpu.run/"><meta property="og:url" content="https://riggpu.run/"><meta property="og:image" content="https://riggpu.run/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/rig.css">
+</head>
+<body>
+<header class="top">
+  <a class="mark" href="/"><i></i><span>RIG</span></a>
+  <nav><a href="#rack">The rack</a><a href="#models">Models</a><a href="#pay">Pay</a><a href="#agents">Agents</a><a href="#receipts">Receipts</a><a href="#token">$RIG</a><a href="/docs">Docs</a><a class="xlink" hidden target="_blank" rel="noopener noreferrer">X</a><a class="ghlink" hidden target="_blank" rel="noopener noreferrer">GitHub</a></nav>
+  <a class="btn ink sm keep" href="/app">Launch app</a>
+</header>
+
+<section class="hero" id="hero">
+  <canvas id="fans" aria-hidden="true"></canvas>
+  <div class="wrap in">
+    <div>
+      <span class="tag">Onchain GPU cloud · Robinhood Chain</span>
+      <h1 aria-label="Rent the rig"><span>Rent</span><span>the rig</span></h1>
+      <p class="sub">A whole NVIDIA GPU, billed by the second. Or a single image, clip or voice, billed by the piece. You pay in USDG, ETH or $RIG, and so can your agent.</p>
+      <div class="cta"><a class="btn ink" href="/app">Launch app</a><a class="btn line" href="/docs">Read the docs</a></div>
+    </div>
+    <div class="rack" aria-label="Live GPU rates">
+      <div class="hd"><span class="lbl">The rack, right now</span><span class="lbl grn" id="r-open">–</span></div>
+      <div id="rackrows"><div class="unit busy"><i></i><b>Reading the market</b><span></span><span></span></div></div>
+    </div>
+  </div>
+</section>
+<div class="strip">
+  <div><span class="lbl">GPUs listed</span><b id="s-all">–</b></div>
+  <div><span class="lbl">Cheapest GPU hour</span><b id="s-cheap">–</b></div>
+  <div><span class="lbl">Models per output</span><b id="s-models">–</b></div>
+  <div><span class="lbl">One credit costs</span><b id="s-credit">–</b></div>
+</div>
+
+<section class="band"><div class="wrap">
+  <div class="head reveal"><span class="lbl">What you can do</span><h2>Borrow the hardware. <em>Skip the invoice.</em></h2><p>One balance of RIG credits pays for everything. A credit buys one dollar of compute at listed prices, and at launch a credit costs 70 cents.</p></div>
+  <div class="three">
+    <div class="slab card reveal"><div><span class="n">01 / RENT</span><h3>A GPU that is all yours</h3><p>SSH and Jupyter on anything from a 16 GB card to a B200. The meter starts when SSH answers and stops the second you end it.</p></div><div class="foot"><span class="lbl">from</span><b id="c-gpu">–</b></div></div>
+    <div class="slab card reveal"><div><span class="n">02 / MAKE</span><h3>One output at a time</h3><p>Send a prompt to a ready model and get an image, a video or a voice back. The price shows first. A failed one is free.</p></div><div class="foot"><span class="lbl">from</span><b id="c-out">–</b></div></div>
+    <div class="slab card reveal"><div><span class="n">03 / DELEGATE</span><h3>Hand it to your agent</h3><p>Connect it over MCP with a daily spend cap, or let it pay each request itself with one signed USDG transfer.</p></div><div class="foot"><span class="lbl">tools over MCP</span><b>14</b></div></div>
+  </div>
+</div></section>
+
+<section class="band" id="rack"><div class="wrap">
+  <div class="head reveal"><span class="lbl">rig/auto</span><h2>Name the memory. <em>Get the cheapest card.</em></h2><p>These are live rates. Drag the slider and the router picks the cheapest open GPU that fits, exactly as it does when you rent.</p></div>
+  <div class="split">
+    <div class="slab auto reveal"><span class="lbl">Your job needs</span><div class="need"><span id="need">24</span><span class="mute" style="font-size:.34em;letter-spacing:0"> GB</span></div><input type="range" id="vr" min="16" max="180" step="4" value="24" aria-label="Memory needed in GB">
+      <div class="pick"><div><span class="lbl">rig/auto picks</span><b id="pick">–</b><span class="mute" id="pickv"></span></div><div style="text-align:right"><span class="strike num" id="pickl"></span><b class="num grn" id="pickp" style="font-size:24px"></b></div></div>
+      <a class="btn ink wide" href="/app#/marketplace" style="margin-top:22px">Rent it</a></div>
+    <div class="slab reveal"><div class="scroll"><table><thead><tr><th>GPU</th><th>Memory</th><th class="r">Listed</th><th class="r">On RIG</th></tr></thead><tbody id="gputable"><tr><td colspan="4" class="mute">Reading the market…</td></tr></tbody></table></div></div>
+  </div>
+</div></section>
+
+<section class="band" id="models"><div class="wrap">
+  <div class="head reveal"><span class="lbl">Models</span><h2>Images, video, voice. <em>Priced per output.</em></h2><p>No subscription and no seats. The same models answer the app, the API and your agent, at the same prices.</p></div>
+  <div class="slab reveal"><table><thead><tr><th>Model</th><th>Makes</th><th>Unit</th><th class="r">Listed</th><th class="r">On RIG</th></tr></thead><tbody id="modeltable"><tr><td colspan="5" class="mute">Reading the catalog…</td></tr></tbody></table></div>
+</div></section>
+
+<section class="band" id="pay"><div class="wrap">
+  <div class="head reveal"><span class="lbl">Payments</span><h2>Four ways to pay. <em>One balance.</em></h2><p>Whatever you send becomes RIG credits. Credits you do not use go back to the wallet that bought them, in the asset it paid with.</p></div>
+  <div class="pay">
+    <div class="slab reveal"><div><span class="lbl grn">01</span><h3>USDG</h3><p>Send USDG on Robinhood Chain. It is credits as soon as the chain confirms the transfer.</p></div><span class="mono mute">5 to 1,000 per deposit</span></div>
+    <div class="slab reveal"><div><span class="lbl grn">02</span><h3>ETH</h3><p>Pay in ETH at the market price of the moment your transfer lands.</p></div><span class="mono mute">priced when it confirms</span></div>
+    <div class="slab reveal"><div><span class="lbl grn">03</span><h3>$RIG</h3><p>Credits bought with the token are spent first, and the tokens behind used credits burn every hour.</p></div><span class="mono mute">burns as it is used</span></div>
+    <div class="slab reveal"><div><span class="lbl grn">04</span><h3>x402</h3><p>An agent signs one USDG transfer for one output. No account, no API key, and RIG pays the gas.</p></div><span class="mono mute">one signature</span></div>
+  </div>
+</div></section>
+
+<section class="band" id="agents"><div class="wrap">
+  <div class="head reveal"><span class="lbl">Agents</span><h2>Ask. Price. <em>Sign. Receive.</em></h2><p>Two HTTP requests. The first answers 402 with what it costs. The second carries a signed USDG transfer and returns the output.</p></div>
+  <div class="split">
+    <div class="slab reveal"><span class="lbl">agent.log</span><div class="term" id="term"></div></div>
+    <div class="slab reveal"><span class="lbl">Or connect once over MCP</span><code class="box" id="mcpcmd">claude mcp add --transport http rig https://YOUR-HOST/mcp \
+  --header "Authorization: Bearer $RIG_KEY"</code>
+      <table><tbody>
+        <tr><td>Rents its own GPU</td><td class="r mute">rent_gpu · get_instance · end_instance</td></tr>
+        <tr><td>Makes outputs</td><td class="r mute">make_output · get_output · list_models</td></tr>
+        <tr><td>Stays inside its budget</td><td class="r mute">a daily spend cap on every key</td></tr>
+        <tr><td>One switch stops it</td><td class="r mute">only your wallet can flip it</td></tr>
+      </tbody></table></div>
+  </div>
+</div></section>
+
+<section class="band" id="receipts"><div class="wrap">
+  <div class="head reveal"><span class="lbl">Receipts</span><h2>The meter is <em>public.</em></h2><p>Every output and every rental writes a receipt. Each hour the receipts are hashed into one root, and the root goes into a Robinhood Chain transaction anyone can read.</p></div>
+  <div class="split">
+    <div class="slab reveal"><span class="lbl">How to check one</span><table><tbody>
+      <tr><td class="num grn">1</td><td>Open a receipt and read its fields: what ran, for how long, what it cost.</td></tr>
+      <tr><td class="num grn">2</td><td>Hash the fields. That is the leaf.</td></tr>
+      <tr><td class="num grn">3</td><td>Hash it with each step of its proof. You arrive at the root of its hour.</td></tr>
+      <tr><td class="num grn">4</td><td>Compare with the transaction onchain. Your browser does all four in the app.</td></tr>
+    </tbody></table></div>
+    <div class="slab reveal"><span class="lbl">Latest sealed hours</span><table><thead><tr><th>Hour (UTC)</th><th>Receipts</th><th class="r">Root</th></tr></thead><tbody id="seals"><tr><td colspan="3" class="mute">The first hour with receipts seals at the top of the next one.</td></tr></tbody></table></div>
+  </div>
+  <div class="facts"><div class="slab reveal"><b id="f-out">0</b><span class="lbl">outputs made</span></div><div class="slab reveal"><b id="f-sec">0</b><span class="lbl">GPU seconds rented</span></div><div class="slab reveal"><b id="f-rc">0</b><span class="lbl">receipts written</span></div><div class="slab reveal"><b id="f-hr">0</b><span class="lbl">hours sealed</span></div></div>
+</div></section>
+
+<section class="band" id="token"><div class="wrap">
+  <div class="head reveal"><span class="lbl">$RIG</span><h2>Hold it for free outputs. <em>Spend it and it burns.</em></h2><p>The token has two jobs, and the ledger enforces both.</p></div>
+  <div class="token">
+    <div class="slab reveal"><span class="lbl grn">Hold</span><h3 style="font-size:32px;margin-top:10px;text-transform:uppercase">1,000 $RIG makes outputs free</h3><p class="mute">A wallet holding at least 1,000 $RIG makes 50 images and 2 five-second videos free every UTC day in the app. New ones arrive at 00:00 UTC, and a free output that fails does not count.</p></div>
+    <div class="slab reveal"><span class="lbl grn">Spend</span><h3 style="font-size:32px;margin-top:10px;text-transform:uppercase">Pay in $RIG and it burns</h3><p class="mute">Credits bought with $RIG are spent before any others. Each hour, the tokens behind the credits that were used are sent to the dead address. Unused ones come back to you as the same tokens.</p>
+      <div class="ca"><code id="ca">$RIG launches on Robinhood Chain. The contract address appears here the moment it is live.</code><button class="btn line sm" id="cabtn" hidden>Copy</button></div></div>
+  </div>
+</div></section>
+
+<section class="band faq" id="faq"><div class="wrap">
+  <div class="head reveal"><span class="lbl">FAQ</span><h2>Straight <em>answers.</em></h2><p>The docs go through every step with the exact requests.</p></div>
+  <details><summary>What is RIG?</summary><p>RIG is a GPU cloud you pay for on Robinhood Chain. It rents whole NVIDIA GPUs by the second with SSH and Jupyter, and it runs ready media models that make images, video and voice for a fixed price per output. Both are paid from one balance of RIG credits.</p></details>
+  <details><summary>What is a RIG credit and what does it cost?</summary><p>One credit pays for one dollar of outputs and rentals at their listed prices. At launch a credit costs 0.70 USDG, so everything is 30% under its listed price. Balances are cut down to the last micro-credit and never rounded up. Unused credits refund to the wallet that bought them at the price it paid, in the asset it paid with.</p></details>
+  <details><summary>How do I pay?</summary><p>Connect a wallet such as MetaMask or Rabby and sign one message to sign in. It costs no gas and moves no funds. Then buy credits in Billing with USDG, ETH or $RIG, from 5 to 1,000 dollars at a time. Your wallet switches to Robinhood Chain, the transfer goes to the RIG treasury, and the credits show up when the chain confirms it.</p></details>
+  <details><summary>What comes with a rental?</summary><p>A whole GPU instance with a 50 GB disk, PyTorch and CUDA installed, SSH on its own port and Jupyter behind an SSH tunnel. Add a public SSH key, pick a GPU or let rig/auto pick the cheapest that fits, and connect. Billing starts the second SSH is ready, so the start is free, and it stops the second you end the instance. A wallet runs one instance at a time.</p></details>
+  <details><summary>What if a GPU fails to start, or my credits run out?</summary><p>A GPU that never starts is never billed. RIG moves the rental once to the next cheapest GPU with at least the same memory, and if that fails too it stops and tells you why. While an instance runs, its cost comes out second by second, and when the balance can no longer pay for the next second the instance ends. The app warns ten minutes ahead.</p></details>
+  <details><summary>How does an agent use RIG?</summary><p>Two ways. With an API key, the agent connects to the MCP server at /mcp and gets 14 tools: balance, models, outputs, GPUs, instances, SSH keys and receipts. Every key can carry a spend cap per UTC day and can be stopped with one switch that only your wallet controls. Without any key, the agent pays each output with x402: it signs one USDG transfer (EIP-3009), RIG submits it and pays the gas.</p></details>
+  <details><summary>What exactly is written onchain?</summary><p>Deposits are ordinary transfers to the treasury on Robinhood Chain. An x402 payment is a signed USDG transfer that the treasury submits. Every hour the receipts of that hour are hashed into a Merkle root, and the root is written into the data of a transaction. A burn of $RIG is a transfer to the dead address. Each is one transaction you can open in the explorer.</p></details>
+  <details><summary>Where do the GPUs come from?</summary><p>From data-center and community capacity reached through Runpod. RIG reads the live catalog, lists each GPU at one rate per hour, and starts your instance on the cheapest machine of the type you asked for. Outputs run on hosted model endpoints from the same provider.</p></details>
+  <details><summary>Is the code open?</summary><p>Yes. The server is one Node.js program with no dependencies: the ledger, the chain code with its own keccak-256 and secp256k1, the provider adapter, the API, the MCP server and the x402 flow. The test suite runs 78 end-to-end checks against a real server process.</p></details>
+</div></section>
+
+<section class="end"><div class="wrap"><h2 class="reveal">Stop buying<br><em>cards.</em></h2><div class="cta reveal" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn ink" href="/app">Launch app</a><a class="btn line" href="/docs">Read the docs</a></div></div></section>
+<div class="wrap"><footer><span class="mono">RIG · the onchain GPU cloud on Robinhood Chain</span><span class="mono"><a href="/docs">Docs</a> · <a href="/app">App</a> · <a class="xlink" hidden target="_blank" rel="noopener noreferrer">X</a> <a class="ghlink" hidden target="_blank" rel="noopener noreferrer">· GitHub</a></span></footer></div>
+<script type="module" src="/landing.js"></script>
+</body>
+</html>
