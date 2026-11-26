@@ -12,7 +12,7 @@ Rent the rig. RIG is a GPU cloud that settles on Robinhood Chain: a whole NVIDIA
 git clone https://github.com/RIGGPU/rig
 cd rig
 RIG_TEST=1 TREASURY=0x000000000000000000000000000000000000beef npm start   # http://localhost:8322
-npm test                                                                    # 78 end-to-end checks
+npm test                                                                    # 81 end-to-end checks
 ```
 
 Needs Node 22 or newer and nothing else. `RIG_TEST=1` stands in for the GPU provider and the chain, so every flow works locally with no key and no funds.

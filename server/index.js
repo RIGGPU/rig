@@ -56,7 +56,7 @@ const TOOLS = [
   T('get_output', 'One output: making, ready with a link to its file, or failed with its credits back.', { id: { type: 'string' } }, ['id']),
   T('list_outputs', 'Your outputs of the last 24 hours, newest first.'),
   T('list_gpus', 'The NVIDIA GPUs open to rent now, with their memory and their rate in credits an hour.'),
-  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. gpu is a name, or "auto" with vram for the cheapest that fits.', { gpu: { type: 'string' }, vram: { type: 'number' } }),
+  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. gpu is a name, or "auto" with vram for the cheapest that fits. loadout is what it boots with: pytorch (default), comfyui, forge or bare.', { gpu: { type: 'string' }, vram: { type: 'number' }, loadout: { type: 'string' } }),
   T('list_instances', 'Your instances that run, and those that ended in the last 24 hours.'),
   T('get_instance', 'One instance: its status, how to reach it over SSH once it is ready, and what it cost so far.', { id: { type: 'string' } }, ['id']),
   T('end_instance', 'Ends an instance. Its credits stop at that second. An ended instance never starts again.', { id: { type: 'string' } }, ['id']),
@@ -134,6 +134,7 @@ async function route(req, res) {
   if (p === '/api/config') return json(res, 200, { treasury: E.treasury(), token: E.TOKEN_MINT, creditPrice: E.CREDIT_PRICE, provider: gpu.connected(), sealing: E.canSign(), network: evm.NETWORK, chainId: evm.CHAIN_ID, usdg: evm.USDG, x402: !!(E.treasury() && (E.canSign() || E.TEST)), x: SITE.x, gh: SITE.gh, test: E.TEST || undefined });
   if (p === '/api/stats') return json(res, 200, E.stats());
   if (p === '/api/seals') return json(res, 200, E.seals());
+  if (p === '/api/v1/loadouts') return json(res, 200, { loadouts: gpu.publicLoadouts() });
   if (p === '/api/v1/models') return json(res, 200, { models: gpu.publicModels(), creditPrice: E.CREDIT_PRICE });
   if (p === '/api/v1/gpus') { const list = await gpu.listGpus(); return json(res, 200, { gpus: list.map(({ id, name, vram, listed, available }) => ({ id, name, vram, listed, available })), auto: gpu.cheapest(list, +url.searchParams.get('vram') || 0)?.name || null }); }
   if (seg[1] === 'receipts' && seg[3] === 'proof') return json(res, 200, E.proof(seg[2]));

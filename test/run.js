@@ -81,13 +81,17 @@ try {
   ok('renting needs an SSH key', (await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA })).status === 400);
   ok('a bad SSH key is refused', (await call('/api/v1/ssh-keys', { body: { name: 'x', key: 'not a key' }, token: tA })).status === 400);
   ok('SSH key added', (await call('/api/v1/ssh-keys', { body: { name: 'laptop', key: SSH }, token: tA })).status === 201);
+  const los = (await call('/api/v1/loadouts')).j.loadouts || [];
+  ok('four loadouts are listed with no key', los.length === 4 && los[0].id === 'pytorch' && los.some((l) => l.id === 'comfyui' && l.port === 8188));
+  ok('an unknown loadout is refused', (await call('/api/v1/instances', { body: { gpu: 'auto', loadout: 'nope' }, token: tA })).status === 400);
   ok('a busy GPU is refused and charges nothing', (await call('/api/v1/instances', { body: { gpu: 'B200' }, token: tA })).status === 409);
-  const i1 = await call('/api/v1/instances', { body: { gpu: 'auto', vram: 24 }, token: tA });
+  const i1 = await call('/api/v1/instances', { body: { gpu: 'auto', vram: 24, loadout: 'comfyui' }, token: tA });
   ok('auto rents the cheapest GPU with 24 GB', i1.status === 201 && i1.j.gpu === 'RTX 3090' && i1.j.status === 'starting', JSON.stringify(i1.j));
   ok('one instance at a time', (await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA })).status === 409);
   ok('refund waits while an instance runs', (await call('/api/billing/refund', { method: 'POST', token: tA })).status === 409);
   const run = await until(async () => { const i = (await call('/api/v1/instances/' + i1.j.id, { token: tA })).j; return i.status === 'running' ? i : null; });
   ok('instance runs with an SSH command', /^ssh root@/.test(run?.ssh || ''));
+  ok('the instance boots its loadout and tunnels its port', run?.loadout?.id === 'comfyui' && /-L 8188:localhost:8188/.test(run?.tunnel || ''), JSON.stringify(run).slice(0, 300));
   await sleep(2300); const mid = (await call('/api/v1/instances/' + i1.j.id, { token: tA })).j;
   ok('billed by the second at its rate', mid.seconds >= 2 && mid.credits > 0 && mid.credits <= mid.rate * (mid.seconds + 3) / 3600, JSON.stringify(mid));
   const end = await call('/api/v1/instances/' + i1.j.id + '/terminate', { method: 'POST', token: tA }); ok('instance ends', end.j.status === 'ended'); await sleep(1300);

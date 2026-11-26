@@ -186,15 +186,15 @@ export function dropSsh(w, sid) { const a = acct(w), n = a.ssh.length; a.ssh = a
 
 // ---------- rentals: a whole GPU, metered by the second ----------
 const live = (i) => ['starting', 'running'].includes(i.state);
-const ipub = (i) => ({ id: i.id, gpu: i.gpu, vram: i.vram, status: i.state, rate: i.rate / M, created: i.ts, started: i.runAt || null, ended: i.endAt || null, seconds: i.seconds, credits: i.micro / M, ssh: i.state === 'running' ? i.ssh : undefined, jupyter: i.state === 'running' ? i.jupyter : undefined, reason: i.reason });
+const ipub = (i) => ({ id: i.id, gpu: i.gpu, vram: i.vram, status: i.state, rate: i.rate / M, created: i.ts, started: i.runAt || null, ended: i.endAt || null, seconds: i.seconds, credits: i.micro / M, loadout: (({ id, name, app, port }) => ({ id, name, app, port }))(gpu.loadout(i.loadout)), ssh: i.state === 'running' ? i.ssh : undefined, tunnel: i.state === 'running' ? i.jupyter || undefined : undefined, jupyter: i.state === 'running' ? i.jupyter || undefined : undefined, reason: i.reason });
 export async function rent(w, body, k = null) {
-  const a = acct(w); if (!a.ssh.length) throw E(400, 'Add an SSH key first'); if (Object.values(db.instances).some((i) => i.wallet === w && live(i))) throw E(409, 'A wallet runs one instance at a time');
+  const a = acct(w), lo = gpu.loadout(body?.loadout); if (!lo) throw E(400, 'Unknown loadout. GET /api/v1/loadouts lists them'); if (!a.ssh.length) throw E(400, 'Add an SSH key first'); if (Object.values(db.instances).some((i) => i.wallet === w && live(i))) throw E(409, 'A wallet runs one instance at a time');
   const list = await gpu.listGpus(), want = !body?.gpu || body.gpu === 'auto' ? gpu.cheapest(list, +body?.vram || 0) : list.find((g) => g.id === body.gpu || g.name.toLowerCase() === String(body.gpu).toLowerCase());
   if (!want) throw E(404, 'No GPU fits that'); if (!want.available) throw E(409, 'That GPU is busy right now. A busy GPU charges nothing');
   const rate = Math.round(want.listed * M); if (balance(w) < rate / 6) throw E(402, 'Your credits must pay for at least 10 minutes of this GPU');
   if (!gpu.connected()) throw E(503, 'The GPU provider is not connected yet');
-  const i = { id: id('ins_'), wallet: w, gpu: want.name, gpuId: want.id, cloud: want.cloud, vram: want.vram, rate, state: 'starting', ts: now(), seconds: 0, micro: 0, took: [], key: k?.id || null, tries: 1 };
-  Object.assign(i, await gpu.startPod(want, i.id, a.ssh.map((s) => s.key))); db.instances[i.id] = i; save(); return ipub(i);
+  const i = { id: id('ins_'), wallet: w, gpu: want.name, gpuId: want.id, cloud: want.cloud, vram: want.vram, rate, state: 'starting', ts: now(), seconds: 0, micro: 0, took: [], key: k?.id || null, tries: 1, loadout: lo.id };
+  Object.assign(i, await gpu.startPod(want, i.id, a.ssh.map((s) => s.key), lo)); db.instances[i.id] = i; save(); return ipub(i);
 }
 async function endInstance(i, reason) {
   if (!live(i)) return; const wasRunning = i.state === 'running'; i.state = reason === 'failed' ? 'failed' : 'ended'; i.endAt = now(); i.reason = reason;
@@ -209,13 +209,13 @@ async function tick() {
     const a = acct(i.wallet), k = a.keys.find((x) => x.id === i.key) || null;
     if (i.key && (!k || k.stopped)) { await endInstance(i, 'its key was stopped'); continue; }
     if (i.state === 'starting' || now() - (i.seen || 0) > (TEST ? 250 : 30e3)) {
-      let p; try { p = await gpu.readPod(i.pod); } catch { continue; } i.seen = now();
+      let p; try { p = await gpu.readPod(i.pod, gpu.loadout(i.loadout)); } catch { continue; } i.seen = now();
       if (p.state === 'running' && i.state === 'starting') { i.state = 'running'; i.runAt = i.billed = now(); i.ssh = p.ssh; i.jupyter = p.jupyter; save(); }   // billing starts the second SSH is ready
       else if (p.state === 'failed' || (p.state === 'ended' && i.state === 'starting') || (i.state === 'starting' && now() - i.ts > 15 * 60e3)) {
         // it never started: move to the next cheapest GPU that fits once, otherwise stop. Nothing was billed.
         try { await gpu.endPod(i.pod); } catch { /* already gone */ }
         const next = i.tries < 2 ? (await gpu.listGpus().catch(() => [])).find((g) => g.available && g.vram >= i.vram && g.id !== i.gpuId && Math.round(g.listed * M) / 6 <= balance(i.wallet)) : null;
-        if (next) { try { Object.assign(i, await gpu.startPod(next, i.id, a.ssh.map((s) => s.key)), { gpu: next.name, gpuId: next.id, vram: next.vram, rate: Math.round(next.listed * M), ts: now(), tries: 2, moved: true }); save(); continue; } catch { /* fall through */ } }
+        if (next) { try { Object.assign(i, await gpu.startPod(next, i.id, a.ssh.map((s) => s.key), gpu.loadout(i.loadout)), { gpu: next.name, gpuId: next.id, vram: next.vram, rate: Math.round(next.listed * M), ts: now(), tries: 2, moved: true }); save(); continue; } catch { /* fall through */ } }
         i.state = 'failed'; i.endAt = now(); i.reason = 'the GPU never started, so nothing was charged'; save(); continue; }
       else if (p.state === 'ended' && i.state === 'running') { await endInstance(i, 'the GPU stopped'); continue; }
     }

@@ -96,17 +96,27 @@ export async function listGpus() {
 export const cheapest = (list, minVram = 0) => list.filter((g) => g.available && g.vram >= minVram)[0] || null;
 
 const pods = new Map();   // test stand-in pods
-export async function startPod(gpu, name, sshKeys) {
+// A loadout is what the instance boots with. Each image is published by the provider and runs its own SSH server.
+export const LOADOUTS = [
+  { id: 'pytorch', name: 'PyTorch + Jupyter', app: 'Jupyter', port: 8888, image: POD_IMAGE, blurb: 'PyTorch, CUDA and JupyterLab. The default.' },
+  { id: 'comfyui', name: 'ComfyUI', app: 'ComfyUI', port: 8188, image: 'runpod/comfyui:latest', blurb: 'Node-graph image and video workflows, ready on boot.' },
+  { id: 'forge', name: 'Forge', app: 'Forge', port: 7860, image: 'runpod/forge:3.3.0', blurb: 'Stable Diffusion WebUI Forge for image generation.' },
+  { id: 'bare', name: 'Bare CUDA', app: null, port: null, image: 'runpod/base:2.1.1-cuda1281-ubuntu2404', blurb: 'Ubuntu 24.04 with CUDA and nothing else. Bring your own stack.' },
+];
+export const loadout = (id) => LOADOUTS.find((l) => l.id === (id || 'pytorch'));
+export const publicLoadouts = () => LOADOUTS.map(({ id, name, app, port, blurb }) => ({ id, name, app, port, blurb }));
+const tunnel = (lo, host, port) => (lo?.port ? `ssh -N -L ${lo.port}:localhost:${lo.port} root@${host} -p ${port}` : null);
+export async function startPod(gpu, name, sshKeys, lo = LOADOUTS[0]) {
   if (TEST) { const id = 'pod_' + Math.random().toString(36).slice(2, 12); pods.set(id, { at: Date.now(), gpu }); return { pod: id }; }
   if (!KEY) throw Object.assign(new Error('The GPU provider is not connected yet'), { status: 503 });
-  const j = await rp(`${API}/pods`, { body: { name, image: POD_IMAGE, gpu: { id: gpu.id, count: 1 }, cloud: gpu.cloud, disk: 50, ports: ['22/tcp', '8888/http'], env: { PUBLIC_KEY: sshKeys.join('\n'), JUPYTER_PASSWORD: name }, startSsh: true, startJupyter: true }, timeout: 60000 });
+  const j = await rp(`${API}/pods`, { body: { name, image: lo.image, gpu: { id: gpu.id, count: 1 }, cloud: gpu.cloud, disk: 50, ports: lo.port ? ['22/tcp', lo.port + '/http'] : ['22/tcp'], env: { PUBLIC_KEY: sshKeys.join('\n'), JUPYTER_PASSWORD: name }, startSsh: true, startJupyter: lo.id === 'pytorch' }, timeout: 60000 });
   if (!j.id) throw new Error('the provider did not start the instance'); return { pod: j.id };
 }
 // -> { state: 'starting' | 'running' | 'ended' | 'failed', ssh, jupyter }
-export async function readPod(id) {
-  if (TEST) { const p = pods.get(id); if (!p) return { state: 'ended' }; if (p.gpu.name === 'RTX 5090' && Date.now() - p.at > 300) return { state: 'failed' }; return Date.now() - p.at < 300 ? { state: 'starting' } : { state: 'running', ssh: 'ssh root@203.0.113.24 -p 22041', jupyter: 'ssh -N -L 8888:localhost:8888 root@203.0.113.24 -p 22041' }; }
+export async function readPod(id, lo = LOADOUTS[0]) {
+  if (TEST) { const p = pods.get(id); if (!p) return { state: 'ended' }; if (p.gpu.name === 'RTX 5090' && Date.now() - p.at > 300) return { state: 'failed' }; return Date.now() - p.at < 300 ? { state: 'starting' } : { state: 'running', ssh: 'ssh root@203.0.113.24 -p 22041', jupyter: tunnel(lo, '203.0.113.24', 22041) }; }
   let j; try { j = await rp(`${API}/pods/${id}`); } catch (e) { if (e.status === 404) return { state: 'ended' }; throw e; }
-  if (j.status === 'RUNNING' && j.ssh?.direct) { const d = j.ssh.direct; return { state: 'running', ssh: `ssh root@${d.host} -p ${d.port}`, jupyter: `ssh -N -L 8888:localhost:8888 root@${d.host} -p ${d.port}` }; }
+  if (j.status === 'RUNNING' && j.ssh?.direct) { const d = j.ssh.direct; return { state: 'running', ssh: `ssh root@${d.host} -p ${d.port}`, jupyter: tunnel(lo, d.host, d.port) }; }
   if (j.status === 'ERROR') return { state: 'failed' };
   if (j.status === 'TERMINATED' || j.status === 'EXITED') return { state: 'ended' };
   return { state: 'starting' };

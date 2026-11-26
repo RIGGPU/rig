@@ -4,6 +4,10 @@ Notable changes to RIG. Versions follow [Semantic Versioning](https://semver.org
 
 ## [Unreleased]
 
+### Added
+
+- Loadouts: an instance can boot into PyTorch + Jupyter, ComfyUI, Forge or bare CUDA (`loadout` on `POST /api/v1/instances`, `GET /api/v1/loadouts`, `rent_gpu` over MCP)
+
 ## [0.1.0] - 2026-11-26
 
 First release.
