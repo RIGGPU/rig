@@ -1,0 +1,10 @@
+node_modules
+.git
+.github
+_studio
+brand
+test
+*.md
+*.json.tmp
+rig.dev.json
+rig-files
