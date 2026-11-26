@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Docs · RIG</title>
+<meta name="description" content="Use RIG step by step: sign in, credits, outputs, GPU rental, the API, the MCP server, x402 and receipts.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/rig.css">
+</head>
+<body>
+<header class="top">
+  <a class="mark" href="/"><i></i><span>RIG</span></a>
+  <nav><a href="/#rack">The rack</a><a href="/#models">Models</a><a href="/#token">$RIG</a><a class="xlink" hidden target="_blank" rel="noopener noreferrer">X</a><a class="ghlink" hidden target="_blank" rel="noopener noreferrer">GitHub</a></nav>
+  <a class="btn ink sm keep" href="/app">Launch app</a>
+</header>
+<div class="wrap docs">
+<aside><a href="#start">Get started</a><a href="#credits">RIG credits</a><a href="#outputs">Make outputs</a><a href="#free">Free outputs</a><a href="#rent">Rent a GPU</a><a href="#billing">Billing</a><a href="#api">API</a><a href="#mcp">MCP server</a><a href="#x402">x402</a><a href="#receipts">Receipts</a><a href="#token">$RIG</a><a href="#run">Run your own</a></aside>
+<article>
+<span class="mono mute">Docs</span><h1>Use RIG, step by step</h1><p>Everything that runs on RIG, from the first signature to a GPU over SSH.</p>
+
+<h2 id="start">Get started</h2>
+<p>Your wallet is your account. There is no email and no password.</p>
+<ol><li>Open the <a href="/app"><u>app</u></a> and press <b>Connect wallet</b>. RIG works with MetaMask, Rabby and any wallet your browser offers.</li><li>Sign one message. It costs no gas and moves no funds.</li><li>The Overview shows your credits, your spend and your running instances.</li></ol>
+<p>RIG runs on Robinhood Chain. When you buy credits, your wallet switches to it, and adds it first if it is new to your wallet.</p>
+
+<h2 id="credits">RIG credits</h2>
+<p>One RIG credit pays for $1 of outputs and rentals at their listed prices. At launch a credit costs 0.70 USDG, so everything is 30% off.</p>
+<ol><li>Open Billing and pick an amount from 5 to 1,000 dollars. The <b>You get</b> line shows the credits it buys: 5 USDG buys 7.1428 credits.</li><li>Press <b>Buy credits</b> and confirm the transfer in your wallet. It goes to the RIG treasury, and your wallet pays the gas in ETH.</li><li>The credits show up as soon as Robinhood Chain confirms the transfer. Each deposit in your history links to the explorer.</li></ol>
+<ul><li>Balances are cut down to the last micro-credit, never rounded up.</li><li>Pay with <b>ETH</b> and it is priced at the market the moment your transfer is confirmed.</li><li>Pay with <b>$RIG</b> and a credit costs the same 0.70 USDG, paid in $RIG at the lower of its spot price and its 30-minute average.</li><li>Credits bought with $RIG are spent first. Each hour, the $RIG behind the credits that were used is sent to the dead address.</li></ul>
+<p>Credits you do not use go back to the wallet that bought them. Open Billing and press <b>Refund my balance</b>. A credit returns at the price you paid for it, in the asset you paid with. A refund takes your whole balance, starts at 1 USDG, and waits while an instance of yours runs.</p>
+
+<h2 id="outputs">Make outputs</h2>
+<p>The Playground makes images, video and voice with ready models. An output takes its credits at the listed price when you press Make, and gives them back if it fails.</p>
+<ol><li>Open the Playground and pick a model.</li><li>Write a prompt of up to 2,000 characters, or the text of a voice of up to 1,000 characters.</li><li>Pick a size: square, wide or tall. A video also takes a length. The price shows before you make it.</li><li>Press <b>Make</b>. The output is made in the background, so you can leave the page.</li><li>Find it under Outputs, where you can play it and download it. Files are kept for 24 hours.</li></ol>
+<table><thead><tr><th>Model</th><th>Makes</th><th>Unit</th><th class="r">Listed, in credits</th></tr></thead><tbody id="dmodels"><tr><td colspan="4" class="mute">Reading the catalog…</td></tr></tbody></table>
+<p style="margin-top:14px">A video is priced per 5 seconds, so 10 seconds cost twice the listed price.</p>
+
+<h2 id="free">Free outputs</h2>
+<p>A wallet with at least 1,000 $RIG makes 50 images and 2 videos free in each UTC day. After that, its outputs take credits.</p>
+<ul><li>New free outputs come at 00:00 UTC.</li><li>A free video is 5 seconds long. A longer one takes credits. A voice always takes credits.</li><li>A free output that fails does not count.</li><li>Free outputs are for the signed-in wallet in the Playground. API keys and x402 always pay.</li></ul>
+
+<h2 id="rent">Rent a GPU</h2>
+<p>Rent a whole NVIDIA GPU with SSH and Jupyter, billed by the second in RIG credits.</p>
+<code class="box">ssh-keygen -t ed25519 -f ~/.ssh/rig -C "rig"
+cat ~/.ssh/rig.pub</code>
+<ol><li>Make an SSH key with the commands above and copy the line the second one prints.</li><li>Open SSH keys, paste the line, give it a name and press <b>Add key</b>. A wallet keeps up to 10 keys and every new instance takes all of them.</li><li>Open the Marketplace and press <b>Rent</b> on a GPU, or <b>Rent the cheapest</b> after setting how much memory you need. A busy GPU charges nothing.</li><li>An instance starts when your credits pay for at least 10 minutes of it. Open My instances and wait for <b>running</b>.</li><li>Copy the SSH command from the card, add <code>-i ~/.ssh/rig</code>, and run it. PyTorch and CUDA come installed.</li><li>For Jupyter, run the tunnel command and leave it running, then open <code>http://localhost:8888</code>.</li><li>Press <b>End instance</b> when you are done. The instance and its 50 GB disk are deleted and its credits stop at that second.</li></ol>
+<ul><li>Billing starts the second SSH is ready, so the start is free.</li><li>Leaving SSH does not end an instance. End instance does.</li><li>A wallet runs one instance at a time, for as long as its credits last.</li><li>If a GPU never starts, nothing is charged. RIG moves the rental once to the next cheapest GPU with at least the same memory.</li><li>When your credits can no longer pay for the next second, the instance ends. My instances warns ten minutes ahead.</li></ul>
+
+<h2 id="billing">Billing</h2>
+<p>Billing shows your balance, the price of a credit and your history. Every deposit, output and rental is one line. A rental is one line that grows while its instance runs.</p>
+
+<h2 id="api">API</h2>
+<p>Call RIG from your own code with an API key. Every request goes to <code>/api/v1</code> and pays with the credits of your wallet, at the same listed prices.</p>
+<ol><li>Open API &amp; x402 and sign in with your wallet.</li><li>Give the key a name, and a spend cap per day if you want one, and press <b>Make key</b>.</li><li>Copy the key, which starts with <code>rgk_</code>. RIG shows it once and keeps only its hash.</li></ol>
+<code class="box" data-origin>curl ORIGIN/api/v1/outputs \
+  -H "Authorization: Bearer $RIG_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "flux-schnell", "prompt": "A lighthouse at dusk"}'
+
+curl ORIGIN/api/v1/outputs/OUTPUT_ID \
+  -H "Authorization: Bearer $RIG_KEY"</code>
+<table><tbody>
+<tr><td><code>GET /credits?days=7</code></td><td>Your balance, and your spend of the last days (1 to 14).</td></tr>
+<tr><td><code>GET /models</code></td><td>The models that make outputs now. No key needed.</td></tr>
+<tr><td><code>POST /outputs</code></td><td>Makes an image, a video or a voice, paid with your credits, or with x402 and no key.</td></tr>
+<tr><td><code>GET /outputs</code></td><td>Your outputs of the last day, newest first.</td></tr>
+<tr><td><code>GET /outputs/{id}</code></td><td>One output: making, ready with its file in base64, or failed with its credits back.</td></tr>
+<tr><td><code>GET /outputs/{id}/file</code></td><td>The file of a ready output itself.</td></tr>
+<tr><td><code>GET /gpus</code></td><td>The GPUs and their rates. No key needed. Add <code>?vram=48</code> to see what rig/auto would pick.</td></tr>
+<tr><td><code>POST /instances</code></td><td>Rents a GPU: <code>{"gpu": "RTX 4090"}</code> or <code>{"gpu": "auto", "vram": 48}</code>.</td></tr>
+<tr><td><code>GET /instances</code>, <code>/instances/{id}</code></td><td>Your instances, each with its SSH command once it runs.</td></tr>
+<tr><td><code>POST /instances/{id}/terminate</code></td><td>Ends an instance. Its credits stop at that second.</td></tr>
+<tr><td><code>GET, POST /ssh-keys</code>, <code>DELETE /ssh-keys/{id}</code></td><td>The SSH keys a new instance takes.</td></tr>
+<tr><td><code>GET /receipts</code></td><td>Your receipts.</td></tr>
+</tbody></table>
+<ul style="margin-top:14px"><li>A key acts for your wallet: it reads credits, makes outputs and rents GPUs. It never refunds credits, signs in, or makes other keys. A wallet keeps up to 10 keys.</li><li>A request with no key or a deleted key answers 401. A stopped key answers 403. A request past the daily cap answers 429 until 00:00 UTC, and an instance the key rented ends when the cap is spent.</li><li>Only your wallet, signed in, changes the cap or the stop of a key.</li></ul>
+
+<h2 id="mcp">MCP server</h2>
+<p>Connect an AI agent to RIG once over MCP. The agent then makes outputs and rents GPUs on its own, with the credits of your wallet and inside the cap of its key.</p>
+<code class="box" data-origin>claude mcp add --transport http rig ORIGIN/mcp \
+  --header "Authorization: Bearer $RIG_KEY"</code>
+<code class="box" data-origin>{ "mcpServers": { "rig": { "url": "ORIGIN/mcp", "headers": { "Authorization": "Bearer ${env:RIG_KEY}" } } } }</code>
+<p>The 14 tools: <code>get_balance</code>, <code>list_models</code>, <code>make_output</code>, <code>get_output</code>, <code>list_outputs</code>, <code>list_gpus</code>, <code>rent_gpu</code>, <code>list_instances</code>, <code>get_instance</code>, <code>end_instance</code>, <code>list_ssh_keys</code>, <code>add_ssh_key</code>, <code>remove_ssh_key</code>, <code>list_receipts</code>.</p>
+<ul><li><code>make_output</code> waits up to 50 seconds. A slower output comes back with the status making, and <code>get_output</code> reads it again.</li><li>A ready output comes with a link to its file that opens with no key for 24 hours. An image also comes inline, so the agent sees it.</li><li>The agent never buys or refunds credits. Your wallet does that in Billing.</li></ul>
+
+<h2 id="x402">x402</h2>
+<p>An agent pays for each output itself with x402: one signature of its own wallet, in USDG on Robinhood Chain, with no API key and no account. RIG submits the transfer and pays the gas.</p>
+<ol><li>Send <code>POST /api/v1/outputs</code> with no Authorization header. RIG answers 402, with the price in the header <code>PAYMENT-REQUIRED</code>.</li><li>The agent signs that USDG transfer (EIP-3009 <code>TransferWithAuthorization</code>, token domain <code>Global Dollar</code>, version <code>1</code>) and sends the same request again, with the payment in the header <code>PAYMENT-SIGNATURE</code>.</li><li>RIG checks the signature, settles the transfer on Robinhood Chain and makes the output. A fast output comes back in the same answer. A slower one answers 202 with its id. The header <code>PAYMENT-RESPONSE</code> names the transaction.</li><li>Read <code>GET /api/v1/outputs/{id}</code> with no key until the output is ready.</li></ol>
+<code class="box">{ "x402Version": 2,
+  "accepts": [{ "scheme": "exact", "network": "eip155:4663",
+    "asset": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "amount": "2937",
+    "payTo": "the RIG treasury", "maxTimeoutSeconds": 120,
+    "extra": { "name": "Global Dollar", "version": "1" } }] }</code>
+<ul><li>Any client of x402 v2 with the exact scheme pays RIG: it knows USDG on Robinhood Chain as the network <code>eip155:4663</code>.</li><li>A payment buys credits for the wallet that signed it and the output spends them, so every output has a receipt. A failed output leaves its credits with that wallet.</li><li>A payment pays once. Sent again, or for another price, it answers 402 with the price.</li><li>x402 pays for outputs. GPU rentals take an API key.</li></ul>
+
+<h2 id="receipts">Receipts</h2>
+<p>Every paid output and every rental writes a receipt: what ran, for how many GPU seconds, and what it cost. Each hour, the receipts of that hour are hashed into a Merkle root, and the root is written into the data of a Robinhood Chain transaction.</p>
+<ol><li>The leaf is the SHA-256 of the fields <code>id|wallet|kind|ref|what|micro|seconds|ts</code> joined with a bar.</li><li>Each step of the proof is hashed with the running hash, smaller value first.</li><li>The last hash is the root of the hour, which is the text in the transaction data: <code>rig:receipts:v1:HOUR:ROOT</code>.</li></ol>
+<p>The Receipts page does this in your browser when you press <b>Check</b>. <code>GET /api/receipts/{id}/proof</code> returns the same proof for your own code.</p>
+
+<h2 id="token">$RIG</h2>
+<p>$RIG does two things on the network. Holding 1,000 makes 50 images and 2 videos free each day. Paying with it buys credits that are spent first, and the tokens behind used credits are burned each hour. Unused ones refund as the same tokens.</p>
+
+<h2 id="run">Run your own</h2>
+<p>RIG is one Node.js 22 program with no dependencies. <code>npm start</code> runs it and <code>npm test</code> runs the end-to-end checks.</p>
+<table><tbody>
+<tr><td><code>TREASURY</code></td><td>The Robinhood Chain address that receives deposits and x402 payments.</td></tr>
+<tr><td><code>RUNPOD_API_KEY</code></td><td>Connects the GPUs and the model endpoints. Outputs and rentals open when it is set.</td></tr>
+<tr><td><code>TREASURY_SECRET</code></td><td>A 32-byte hex private key. Lets the server send refunds, burn $RIG, write the hourly root and settle x402 payments.</td></tr>
+<tr><td><code>TOKEN_ADDRESS</code></td><td>The contract of $RIG. Turns on paying with it, free outputs and the burn.</td></tr>
+<tr><td><code>RPC_URL</code>, <code>DATA_PATH</code>, <code>MARKUP</code>, <code>SITE_URL</code>, <code>X_URL</code>, <code>GH_URL</code>, <code>ADMIN_KEY</code></td><td>The chain RPC, where the ledger is kept, the rate over provider cost, and links.</td></tr>
+</tbody></table>
+</article>
+</div>
+<script type="module" src="/docs.js"></script>
+</body>
+</html>
