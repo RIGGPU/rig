@@ -10,7 +10,7 @@ import * as evm from './evm.js';
 
 const PORT = +process.env.PORT || 8322, ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'client');
 const okUrl = (u) => (/^https:\/\/[^\s"'<>]+$/.test(u || '') ? u : '');
-const SITE = { x: okUrl(process.env.X_URL), gh: okUrl(process.env.GH_URL) || 'https://github.com/RIGGPU/rig', origin: okUrl(process.env.SITE_URL) };
+const SITE = { x: okUrl(process.env.X_URL) || 'https://x.com/RIGRobinhood', gh: okUrl(process.env.GH_URL) || 'https://github.com/RIGGPU/rig', origin: okUrl(process.env.SITE_URL) };
 const ADMIN_KEY = process.env.ADMIN_KEY || '';
 const err = (status, message) => Object.assign(new Error(message), { status });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64'), unb64 = (s) => JSON.parse(Buffer.from(String(s), 'base64').toString('utf8'));
