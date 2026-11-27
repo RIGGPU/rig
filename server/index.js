@@ -56,8 +56,8 @@ const TOOLS = [
   T('get_output', 'One output: making, ready with a link to its file, or failed with its credits back.', { id: { type: 'string' } }, ['id']),
   T('list_outputs', 'Your outputs of the last 24 hours, newest first.'),
   T('list_gpus', 'The NVIDIA GPUs open to rent now, with their memory and their rate in credits an hour.'),
-  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. gpu is a name, or "auto" with vram for the cheapest that fits. loadout is what it boots with: pytorch (default), comfyui, forge or bare. fuse is a number of minutes of running time after which it ends itself.', { gpu: { type: 'string' }, vram: { type: 'number' }, loadout: { type: 'string' }, fuse: { type: 'number' } }),
-  T('list_instances', 'Your instances that run, and those that ended in the last 24 hours.'),
+  T('rent_gpu', 'Rents an instance with an NVIDIA GPU, SSH and Jupyter, paid by the second with your credits until it is ended. A wallet runs several at once, each with its own meter: call it again for another. gpu is a name, or "auto" with vram for the cheapest that fits. loadout is what it boots with: pytorch (default), comfyui, forge or bare. fuse is a number of minutes of running time after which it ends itself.', { gpu: { type: 'string' }, vram: { type: 'number' }, loadout: { type: 'string' }, fuse: { type: 'number' } }),
+  T('list_instances', 'Your instances that run, and those that ended in the last 24 hours, with how many run at once and what they cost together per hour.'),
   T('get_instance', 'One instance: its status, how to reach it over SSH once it is ready, and what it cost so far.', { id: { type: 'string' } }, ['id']),
   T('end_instance', 'Ends an instance. Its credits stop at that second. An ended instance never starts again.', { id: { type: 'string' } }, ['id']),
   T('list_ssh_keys', 'The public SSH keys that a new instance takes.'),
@@ -75,7 +75,7 @@ async function callTool(who, name, a, origin) {
     case 'list_outputs': return E.outputsOf(w).map(link);
     case 'list_gpus': return (await gpu.listGpus()).filter((g) => g.available).map(({ name: n, vram, listed }) => ({ name: n, vram, creditsPerHour: listed }));
     case 'rent_gpu': return E.rent(w, a, k);
-    case 'list_instances': return E.instancesOf(w);
+    case 'list_instances': return { instances: E.instancesOf(w), fleet: E.fleetOf(w) };
     case 'get_instance': return E.getInstance(w, a.id);
     case 'end_instance': return E.endRental(w, a.id);
     case 'list_ssh_keys': return E.sshOf(w);
@@ -162,7 +162,7 @@ async function route(req, res) {
     if (r === 'credits') return json(res, 200, E.spendOf(w, +url.searchParams.get('days') || 7));
     if (r === 'outputs' && mth === 'GET') return json(res, 200, { outputs: E.outputsOf(w) });
     if (r === 'instances' && !rid && mth === 'POST') return json(res, 201, await E.rent(w, body, u.key));
-    if (r === 'instances' && !rid) return json(res, 200, { instances: E.instancesOf(w) });
+    if (r === 'instances' && !rid) return json(res, 200, { instances: E.instancesOf(w), fleet: E.fleetOf(w) });
     if (r === 'instances' && act === 'terminate' && mth === 'POST') return json(res, 200, await E.endRental(w, rid));
     if (r === 'instances' && rid) return json(res, 200, E.getInstance(w, rid));
     if (r === 'ssh-keys' && !rid && mth === 'POST') return json(res, 201, E.addSsh(w, body.name, body.key));

@@ -186,14 +186,15 @@ export function dropSsh(w, sid) { const a = acct(w), n = a.ssh.length; a.ssh = a
 
 // ---------- rentals: a whole GPU, metered by the second ----------
 const live = (i) => ['starting', 'running'].includes(i.state);
+export const FLEET = Math.min(16, Math.max(1, Math.floor(Number(process.env.FLEET) || 4)));   // instances one wallet runs at once
 const ipub = (i) => ({ id: i.id, gpu: i.gpu, vram: i.vram, status: i.state, rate: i.rate / M, created: i.ts, started: i.runAt || null, ended: i.endAt || null, seconds: i.seconds, credits: i.micro / M, fuse: i.fuse || null, fuseEnds: i.fuse && i.runAt ? i.runAt + Math.round(i.fuse * 60e3) : null, loadout: (({ id, name, app, port }) => ({ id, name, app, port }))(gpu.loadout(i.loadout)), ssh: i.state === 'running' ? i.ssh : undefined, tunnel: i.state === 'running' ? i.jupyter || undefined : undefined, jupyter: i.state === 'running' ? i.jupyter || undefined : undefined, reason: i.reason });
 export async function rent(w, body, k = null) {
   const a = acct(w), lo = gpu.loadout(body?.loadout); if (!lo) throw E(400, 'Unknown loadout. GET /api/v1/loadouts lists them');
   // a fuse is a number of minutes of running time after which the instance ends itself
-  const fuse = body?.fuse == null || body.fuse === '' ? 0 : +body.fuse; if (fuse !== 0 && !(fuse >= (TEST ? 0.02 : 5) && fuse <= 10080)) throw E(400, 'A fuse is between 5 minutes and 7 days, in minutes'); if (!a.ssh.length) throw E(400, 'Add an SSH key first'); if (Object.values(db.instances).some((i) => i.wallet === w && live(i))) throw E(409, 'A wallet runs one instance at a time');
+  const fuse = body?.fuse == null || body.fuse === '' ? 0 : +body.fuse; if (fuse !== 0 && !(fuse >= (TEST ? 0.02 : 5) && fuse <= 10080)) throw E(400, 'A fuse is between 5 minutes and 7 days, in minutes'); if (!a.ssh.length) throw E(400, 'Add an SSH key first'); const mine = Object.values(db.instances).filter((i) => i.wallet === w && live(i)); if (mine.length >= FLEET) throw E(409, `A wallet runs ${FLEET} instances at once. End one first`);
   const list = await gpu.listGpus(), want = !body?.gpu || body.gpu === 'auto' ? gpu.cheapest(list, +body?.vram || 0) : list.find((g) => g.id === body.gpu || g.name.toLowerCase() === String(body.gpu).toLowerCase());
   if (!want) throw E(404, 'No GPU fits that'); if (!want.available) throw E(409, 'That GPU is busy right now. A busy GPU charges nothing');
-  const rate = Math.round(want.listed * M); if (balance(w) < rate / 6) throw E(402, 'Your credits must pay for at least 10 minutes of this GPU');
+  const rate = Math.round(want.listed * M); if (balance(w) < (rate + mine.reduce((s, x) => s + x.rate, 0)) / 6) throw E(402, mine.length ? 'Your credits must pay for at least 10 minutes of everything you run, this GPU included' : 'Your credits must pay for at least 10 minutes of this GPU');
   if (!gpu.connected()) throw E(503, 'The GPU provider is not connected yet');
   const i = { id: id('ins_'), wallet: w, gpu: want.name, gpuId: want.id, cloud: want.cloud, vram: want.vram, rate, state: 'starting', ts: now(), seconds: 0, micro: 0, took: [], key: k?.id || null, tries: 1, loadout: lo.id, fuse };
   Object.assign(i, await gpu.startPod(want, i.id, a.ssh.map((s) => s.key), lo)); db.instances[i.id] = i; save(); return ipub(i);
@@ -227,6 +228,7 @@ async function tick() {
       if (live(i) && i.fuse && now() >= i.runAt + i.fuse * 60e3) await endInstance(i, 'its fuse ran out'); }
   }
 }
+export const fleetOf = (w) => { const on = Object.values(db.instances).filter((i) => i.wallet === w && live(i)); return { running: on.length, max: FLEET, rate: on.reduce((s, i) => s + i.rate, 0) / M }; };
 export const instancesOf = (w) => Object.values(db.instances).filter((i) => i.wallet === w).sort((a, b) => b.ts - a.ts).map(ipub);
 export function getInstance(w, insId) { const i = db.instances[insId]; if (!i || i.wallet !== w) throw E(404, 'No such instance'); return ipub(i); }
 

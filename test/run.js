@@ -87,7 +87,12 @@ try {
   ok('a busy GPU is refused and charges nothing', (await call('/api/v1/instances', { body: { gpu: 'B200' }, token: tA })).status === 409);
   const i1 = await call('/api/v1/instances', { body: { gpu: 'auto', vram: 24, loadout: 'comfyui' }, token: tA });
   ok('auto rents the cheapest GPU with 24 GB', i1.status === 201 && i1.j.gpu === 'RTX 3090' && i1.j.status === 'starting', JSON.stringify(i1.j));
-  ok('one instance at a time', (await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA })).status === 409);
+  const f2 = await call('/api/v1/instances', { body: { gpu: 'auto', loadout: 'bare' }, token: tA }), f3 = await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA }), f4 = await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA });
+  ok('a wallet runs four instances at once', f2.status === 201 && f3.status === 201 && f4.status === 201 && new Set([i1.j.id, f2.j.id, f3.j.id, f4.j.id]).size === 4, JSON.stringify([f2.status, f3.status, f4.status]));
+  ok('a fifth is refused', (await call('/api/v1/instances', { body: { gpu: 'auto' }, token: tA })).status === 409);
+  const fl = (await call('/api/v1/instances', { token: tA })).j.fleet;
+  ok('the fleet reports its count and combined rate', fl?.running === 4 && fl.max === 4 && Math.abs(fl.rate - (i1.j.rate + f2.j.rate + f3.j.rate + f4.j.rate)) < 1e-6, JSON.stringify(fl));
+  for (const f of [f2, f3, f4]) await call('/api/v1/instances/' + f.j.id + '/terminate', { method: 'POST', token: tA });
   ok('refund waits while an instance runs', (await call('/api/billing/refund', { method: 'POST', token: tA })).status === 409);
   const run = await until(async () => { const i = (await call('/api/v1/instances/' + i1.j.id, { token: tA })).j; return i.status === 'running' ? i : null; });
   ok('instance runs with an SSH command', /^ssh root@/.test(run?.ssh || ''));

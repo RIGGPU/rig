@@ -6,6 +6,7 @@ Notable changes to RIG. Versions follow [Semantic Versioning](https://semver.org
 
 ### Added
 
+- Fleet: a wallet runs up to four instances at once (`FLEET`), each with its own meter, loadout and fuse; `GET /api/v1/instances` and `list_instances` return the count and the combined hourly rate
 - Fuse: `fuse` minutes on `POST /api/v1/instances` and `rent_gpu` ends the instance by itself after that much running time
 - Loadouts: an instance can boot into PyTorch + Jupyter, ComfyUI, Forge or bare CUDA (`loadout` on `POST /api/v1/instances`, `GET /api/v1/loadouts`, `rent_gpu` over MCP)
 

@@ -46,7 +46,7 @@
 <code class="box">ssh-keygen -t ed25519 -f ~/.ssh/rig -C "rig"
 cat ~/.ssh/rig.pub</code>
 <ol><li>Make an SSH key with the commands above and copy the line the second one prints.</li><li>Open SSH keys, paste the line, give it a name and press <b>Add key</b>. A wallet keeps up to 10 keys and every new instance takes all of them.</li><li>Open the Marketplace and press <b>Rent</b> on a GPU, or <b>Rent the cheapest</b> after setting how much memory you need. A busy GPU charges nothing.</li><li>An instance starts when your credits pay for at least 10 minutes of it. Open My instances and wait for <b>running</b>.</li><li>Copy the SSH command from the card, add <code>-i ~/.ssh/rig</code>, and run it. PyTorch and CUDA come installed.</li><li>For Jupyter, run the tunnel command and leave it running, then open <code>http://localhost:8888</code>.</li><li>Press <b>End instance</b> when you are done. The instance and its 50 GB disk are deleted and its credits stop at that second.</li></ol>
-<ul><li>Billing starts the second SSH is ready, so the start is free.</li><li>Leaving SSH does not end an instance. End instance does.</li><li>A wallet runs one instance at a time, for as long as its credits last.</li><li>If a GPU never starts, nothing is charged. RIG moves the rental once to the next cheapest GPU with at least the same memory.</li><li>When your credits can no longer pay for the next second, the instance ends. My instances warns ten minutes ahead.</li></ul>
+<ul><li>Billing starts the second SSH is ready, so the start is free.</li><li>Leaving SSH does not end an instance. End instance does.</li><li>A wallet runs up to four instances at once, each with its own meter, loadout and fuse, all paid from one balance. Your credits must cover ten minutes of everything you run before another one starts.</li><li>If a GPU never starts, nothing is charged. RIG moves the rental once to the next cheapest GPU with at least the same memory.</li><li>When your credits can no longer pay for the next second, the instance ends. My instances warns ten minutes ahead.</li></ul>
 
 <h2 id="billing">Billing</h2>
 <p>Billing shows your balance, the price of a credit and your history. Every deposit, output and rental is one line. A rental is one line that grows while its instance runs.</p>
@@ -69,7 +69,7 @@ curl ORIGIN/api/v1/outputs/OUTPUT_ID \
 <tr><td><code>GET /outputs/{id}</code></td><td>One output: making, ready with its file in base64, or failed with its credits back.</td></tr>
 <tr><td><code>GET /outputs/{id}/file</code></td><td>The file of a ready output itself.</td></tr>
 <tr><td><code>GET /gpus</code></td><td>The GPUs and their rates. No key needed. Add <code>?vram=48</code> to see what rig/auto would pick.</td></tr>
-<tr><td><code>POST /instances</code></td><td>Rents a GPU: <code>{"gpu": "RTX 4090"}</code> or <code>{"gpu": "auto", "vram": 48}</code>.</td></tr>
+<tr><td><code>POST /instances</code></td><td>Rents a GPU: <code>{"gpu": "RTX 4090"}</code> or <code>{"gpu": "auto", "vram": 48}</code>. Call it again for another, up to four at once.</td></tr>
 <tr><td><code>GET /instances</code>, <code>/instances/{id}</code></td><td>Your instances, each with its SSH command once it runs.</td></tr>
 <tr><td><code>POST /instances/{id}/terminate</code></td><td>Ends an instance. Its credits stop at that second.</td></tr>
 <tr><td><code>GET, POST /ssh-keys</code>, <code>DELETE /ssh-keys/{id}</code></td><td>The SSH keys a new instance takes.</td></tr>
